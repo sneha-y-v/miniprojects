@@ -16,6 +16,7 @@ import com.sneha.model.UserDao;
 import com.sneha.repository.QuestionnariesParticipantRepo;
 import com.sneha.repository.QuestionnariesRepository;
 import com.sneha.repository.UserRepository;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -62,6 +63,13 @@ public class QuestionnariesService {
 		Questionnaries questionnaries= new Questionnaries();
 		questionnaries.setId(question.getId());
 		questionnaries.setTitle(question.getTitle());
+		questionnaries.setDescription(question.getDescription());
+		questionnaries.setButtonText(question.getButtonText());
+		questionnaries.setButtonTitle(question.getButtonTitle());
+		questionnaries.setCheckBoxText(question.getCheckBoxText());
+		questionnaries.setStartDate(question.getStartDate());
+		questionnaries.setEndDate(question.getEndDate());
+		questionnaries.setMailBody(question.getMailBody());
 		questionRepo.save(questionnaries);
 	}
 
@@ -88,12 +96,34 @@ public class QuestionnariesService {
 			String email = user.get().getUsername();
 			Optional<Questionnaries> question = questionRepo.findById(questionId);
 			String subject = question.get().getTitle();
-			String message = "hi "+ user.get().getName()+", \n\nclick the following link: http://localhost:8080/userloginpage \n\nAnd accept the terms and condition";
+			String message = question.get().getMailBody();
 			emailService.sendMail(email,subject, message);
 		}
 
 	}
 	
+	public List<QuestionnariesParticipant> generateReport(int questionId) {
+
+		List<QuestionnariesParticipant> questionnariesParticipants = questionnariesParticipantsRepo.findByQuestionId(questionId);
+		
+		return questionnariesParticipants;
+		
+	}
+	public void sendRemainder(int questionId) {
+
+		List<QuestionnariesParticipant> questionParticipants = questionnariesParticipantsRepo.findByQuestionId(questionId);
+		for(QuestionnariesParticipant questionnariesParticipant : questionParticipants) {
+			Optional<Questionnaries> question = questionRepo.findById(questionId);
+			Optional<UserDao> participant = userRepo.findById(questionnariesParticipant.getParticipantId());
+			if(questionnariesParticipant.getStatus() == false && question.get().getRemainder() == 1 ) {
+				String email = participant.get().getUsername();
+				String subject = "Remainder for accepting a "+ question.get().getTitle();
+				String message = "Hi "+ participant.get().getName()+",\n\nOnly one day remaining for accepting "+ question.get().getTitle()+"\n\nPlease accept by today!!!";
+				emailService.sendMail(email,subject, message);
+			}
+		}
+	}	    
+
 	
 	
 	public String storeFile(MultipartFile file){
@@ -150,12 +180,5 @@ public class QuestionnariesService {
 	    }
 	}
 
-	public List<QuestionnariesParticipant> generateReport(int questionId) {
-
-		List<QuestionnariesParticipant> questionnariesParticipants = questionnariesParticipantsRepo.findByQuestionId(questionId);
-		
-		return questionnariesParticipants;
-		
-	}	    
 
 }

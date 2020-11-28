@@ -1,6 +1,7 @@
 package com.sneha.model;
 
 import java.io.Serializable;
+import java.util.Set;
 
 public class JwtRequest implements Serializable {
 
@@ -10,12 +11,12 @@ public class JwtRequest implements Serializable {
     private String username;
     private String password;
     private String name;
-    private String role;
+    private Set<String> role;
     
-    public String getRole() {
+    public Set<String> getRole() {
 		return role;
 	}
-	public void setRole(String role) {
+	public void setRole(Set<String> role) {
 		this.role = role;
 	}
     public String getEmployeeCode() {

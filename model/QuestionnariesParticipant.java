@@ -49,6 +49,9 @@ public class QuestionnariesParticipant {
 		this.status = status;
 	}
 
-	
+	public boolean getStatus() {
+		return status;
+	}
+
 	
 }

@@ -50,10 +50,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
 		
 				httpSecurity.csrf().disable()
-				.authorizeRequests().antMatchers("/login","/user/changePassword","/uploadParticipant").permitAll()
-				.antMatchers("/user/addAdmin","/user/addSuperAdmin","/user/remove","/new","/report").hasRole("SUPERADMIN")
-				.antMatchers("/questionnaries/uploadPpt","/questionnaries/new","/questionnaries/save").hasAnyRole("ADMIN","SUPERADMIN")
-				.antMatchers("/download-file/{fileName:.+}","/completedList","/completedQuestion","/accept").hasRole("USER")
+				.authorizeRequests().antMatchers("/login","/user/changePassword").permitAll()
+				.antMatchers("/user/add","/user/remove").hasRole("SUPERADMIN")
+				.antMatchers("/questionnaries/**").hasAnyRole("ADMIN","SUPERADMIN")
+			    .antMatchers("/download-file/{fileName:.+}","/pendingList","/pendingQuestion","/completedList","/completedQuestion","/accept").hasRole("USER")
 				.anyRequest().authenticated().and()
 			    .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -61,4 +61,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		// Add a filter to validate the tokens with every request
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 	}
+	
+	
 }

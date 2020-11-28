@@ -27,7 +27,7 @@ import com.sneha.repository.QuestionnariesRepository;
 import com.sneha.service.QuestionnariesService;
 
 @RestController
-//@RequestMapping(value = "/questionnaries")
+@RequestMapping(value = "/questionnaries")
 public class QuestionnariesController {
 
 	@Autowired
@@ -42,6 +42,7 @@ public class QuestionnariesController {
 	    questionRepo.save(newQuestionId);
 		return newQuestionId.getId();
 	}
+	
     @PutMapping("/save")
     public void addQuestion(@RequestBody Questionnaries questionnaries) {
     	questionService.add(questionnaries);
@@ -71,6 +72,12 @@ public class QuestionnariesController {
     	questionService.publishQuestionnaries(questionId);
     }
 
+    @GetMapping("/remainder")
+    public void remainder(@RequestParam int questionId)
+    {
+    	questionService.sendRemainder(questionId);
+    }
+    
     @GetMapping("/report")
     @ResponseBody
     public List<QuestionnariesParticipant> report(@RequestParam int questionId) throws IOException {

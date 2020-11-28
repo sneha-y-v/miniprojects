@@ -3,7 +3,7 @@ package com.sneha.controller;
 import com.sneha.config.JwtTokenUtil;
 import com.sneha.model.JwtRequest;
 import com.sneha.model.JwtResponse;
-import com.sneha.service.InvisionUserDetailsService;
+import com.sneha.service.AppUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,7 +26,7 @@ public class JwtAuthenticationController {
 	private JwtTokenUtil jwtTokenUtil;
 	
 	@Autowired
-	private InvisionUserDetailsService userDetailsService;
+	private AppUserDetailsService userDetailsService;
     
 	@PostMapping("/login")
 	public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {

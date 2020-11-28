@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,7 +20,7 @@ public class SafeguardingCodeController {
 
 	@Autowired
 	private SafeguardingCodeService safeguardingCodeService; 
-	
+
 	@GetMapping("/pendingList")
 	@ResponseBody
 	public Map<Integer, String> getPendingQuestionnariesList(@RequestParam String empId) {

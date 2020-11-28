@@ -1,6 +1,9 @@
 package com.sneha.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.List;
+import java.util.Set;
+
 import javax.persistence.*;
 
 @Entity
@@ -16,13 +19,30 @@ public class UserDao {
 	@Column
     @JsonIgnore
     private String password;
-    @Column
-    private String role;
-    public String getRole() {
-		return role;
+ 
+    
+	@ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name="user_role",joinColumns={@JoinColumn(name="USER_ID", referencedColumnName="employeeCode")},inverseJoinColumns={@JoinColumn(name="ROLE_ID", referencedColumnName="id")})
+	private Set<UserRoles> roles;
+
+    
+    public UserDao() {
+		super();
 	}
-	public void setRole(String role) {
-		this.role = role;
+    
+	public UserDao(String employeeCode, String name, String username, String password) {
+		super();
+		this.employeeCode = employeeCode;
+		this.name = name;
+		this.username = username;
+		this.password = password;
+	}
+
+	public Set<UserRoles> getRoles() {
+		return roles;
+	}
+	public void setRole(Set<UserRoles> role) {
+		this.roles = role;
 	}
 
 	public String getEmployeeCode() {
