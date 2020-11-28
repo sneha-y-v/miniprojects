@@ -1,6 +1,8 @@
 package com.sneha.controller;
 
 import java.io.IOException;
+import java.util.List;
+
 import org.springframework.core.io.Resource;
 import javax.servlet.http.HttpServletRequest;
 
@@ -14,17 +16,18 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.sneha.model.Participants;
 import com.sneha.model.Questionnaries;
+import com.sneha.model.QuestionnariesParticipant;
 import com.sneha.repository.QuestionnariesRepository;
 import com.sneha.service.QuestionnariesService;
 
 @RestController
-@RequestMapping(value = "/questionnaries")
+//@RequestMapping(value = "/questionnaries")
 public class QuestionnariesController {
 
 	@Autowired
@@ -45,8 +48,9 @@ public class QuestionnariesController {
     }
     
     @PutMapping("/uploadParticipant")
-    public void uploadParticipant(Participants participants) {    	
-    	questionService.uploadParticipant(participants);
+    public void uploadParticipant(@RequestBody List<String> participantIds, @RequestParam int questionId) {    	
+
+    	questionService.uploadParticipant(participantIds,questionId);
     }
 	
     @PutMapping("/uploadPpt")
@@ -61,7 +65,20 @@ public class QuestionnariesController {
 	    questionService.savePpt(questionnariesId, pptDownloadUrl);
 	     
 	  }
+    
+    @PutMapping("/publish")
+    public void publishQuestionnaries(@RequestParam int questionId) {         
+    	questionService.publishQuestionnaries(questionId);
+    }
 
+    @GetMapping("/report")
+    @ResponseBody
+    public List<QuestionnariesParticipant> report(@RequestParam int questionId) throws IOException {
+    	List <QuestionnariesParticipant>questionnariesParticipants = questionService.generateReport(questionId);
+		
+    	return questionnariesParticipants;
+    }
+    
     @GetMapping("/download-file/{fileName:.+}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
         Resource resource = questionService.loadFileAsResource(fileName);

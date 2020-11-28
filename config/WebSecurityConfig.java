@@ -31,9 +31,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-		// configure AuthenticationManager so that it knows from where to load
-		// user for matching credentials
-		// Use BCryptPasswordEncoder
+
 		auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
 	}
 
@@ -52,11 +50,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
 		
 				httpSecurity.csrf().disable()
-
-				.authorizeRequests().antMatchers("/login","/user/changePassword").permitAll()
-				.antMatchers("/user/addAdmin","/user/addSuperAdmin","/user/removeAdmin").hasRole("SUPERADMIN")
-				.antMatchers("/questionnaries/uploadPpt","/questionnaries/new","/questionnaries/add","/questionnaries/save").hasAnyRole("ADMIN","SUPERADMIN")
-				.antMatchers("/download-file/{fileName:.+}").hasRole("USER")
+				.authorizeRequests().antMatchers("/login","/user/changePassword","/uploadParticipant").permitAll()
+				.antMatchers("/user/addAdmin","/user/addSuperAdmin","/user/remove","/new","/report").hasRole("SUPERADMIN")
+				.antMatchers("/questionnaries/uploadPpt","/questionnaries/new","/questionnaries/save").hasAnyRole("ADMIN","SUPERADMIN")
+				.antMatchers("/download-file/{fileName:.+}","/completedList","/completedQuestion","/accept").hasRole("USER")
 				.anyRequest().authenticated().and()
 			    .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);

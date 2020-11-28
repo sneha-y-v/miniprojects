@@ -52,7 +52,7 @@ public class UserController {
 		return ResponseEntity.ok("email sent successfully!!!");
 	}
     
-    @RequestMapping(value = "/removeAdmin", method = RequestMethod.POST)
+    @RequestMapping(value = "/remove", method = RequestMethod.POST)
 	public ResponseEntity<?> deleteAdmin(@RequestBody UserDto user) throws Exception {    	
     	
     	userDetailsService.delete(user);    	

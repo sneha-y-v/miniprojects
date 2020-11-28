@@ -1,7 +1,11 @@
 package com.sneha.model;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.persistence.*;
 
@@ -16,10 +20,12 @@ public class Questionnaries {
     private String title;
 	
     @Column
-    private String ppt;
-    
-	@OneToMany(mappedBy = "questionnaries", cascade = CascadeType.ALL)
-	private Set<QuestionnariesParticipant> questionnariesParticipant;
+    private String ppt;    
+
+
+	public Questionnaries() {
+		super();
+	}
 
 	public int getId() {
 		return questionId;
@@ -43,14 +49,6 @@ public class Questionnaries {
 
 	public void setPpt(String ppt) {
 		this.ppt = ppt;
-	}
-
-	public Set<QuestionnariesParticipant> getQuestionnariesParticipant() {
-		return questionnariesParticipant;
-	}
-
-	public void setQuestionnariesParticipant(Set<QuestionnariesParticipant> questionnariesParticipant) {
-		this.questionnariesParticipant = questionnariesParticipant;
 	}
 	
 }

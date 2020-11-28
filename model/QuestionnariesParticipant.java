@@ -7,15 +7,13 @@ public class QuestionnariesParticipant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "question_id")
-    private Questionnaries questionnaries ;
+    private int id;    
+   
+    @Column(name = "question_id")
+    private int questionnariesId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "participant_id")
-    private Participants participants;
+    @Column(name = "participant_id")
+    private String participantId;
 
     private boolean status = false;
 
@@ -27,20 +25,20 @@ public class QuestionnariesParticipant {
 		this.id = id;
 	}
 
-	public Questionnaries getQuestionnaries() {
-		return questionnaries;
+	public int getQuestionnariesId() {
+		return questionnariesId;
 	}
 
-	public void setQuestionnaries(Questionnaries questionnaries) {
-		this.questionnaries = questionnaries;
+	public void setQuestionnariesId(int questionId) {
+		this.questionnariesId = questionId;
 	}
 
-	public Participants getParticipants() {
-		return participants;
+	public String getParticipantId() {
+		return participantId;
 	}
 
-	public void setParticipants(Participants participants) {
-		this.participants = participants;
+	public void setParticipantId(String participantId) {
+		this.participantId = participantId;
 	}
 
 	public boolean isStatus() {
@@ -49,6 +47,8 @@ public class QuestionnariesParticipant {
 
 	public void setStatus(boolean status) {
 		this.status = status;
-	}   
+	}
+
+	
 	
 }

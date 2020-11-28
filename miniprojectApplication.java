@@ -11,10 +11,10 @@ import com.sneha.model.PptUpload;
     PptUpload.class
 })
 
-public class invisionApplication   {
+public class miniprojectApplication   {
     
 	public static void main(String[] args) {
-		SpringApplication.run(invisionApplication .class, args);
+		SpringApplication.run(miniprojectApplication .class, args);
 	}
 
     

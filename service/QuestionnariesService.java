@@ -9,13 +9,13 @@ import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sneha.model.Participants;
 import com.sneha.model.PptUpload;
 import com.sneha.model.Questionnaries;
-import com.sneha.repository.ParticipantRepository;
+import com.sneha.model.QuestionnariesParticipant;
+import com.sneha.model.UserDao;
+import com.sneha.repository.QuestionnariesParticipantRepo;
 import com.sneha.repository.QuestionnariesRepository;
-
-
+import com.sneha.repository.UserRepository;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -34,15 +34,17 @@ import org.springframework.web.multipart.MultipartFile;
 public class QuestionnariesService {
 
 	@Autowired
-	private QuestionnariesRepository questionRepo;
-	
-	@Autowired
-	private ParticipantRepository participantRepo;
+	private QuestionnariesRepository questionRepo;	
 	
 	@Autowired
 	private EmailService emailService;
-
 	
+	@Autowired
+	private QuestionnariesParticipantRepo questionnariesParticipantsRepo;
+	
+	@Autowired
+	private UserRepository userRepo;
+
 	private final Path fileStorageLocation;
 	
 	@Autowired
@@ -56,17 +58,21 @@ public class QuestionnariesService {
             throw new FileUploadException("Unable to create the directory where the uploaded files will be stored.", ex);
         }
     }
-	
 	public void add(Questionnaries question) {
 		Questionnaries questionnaries= new Questionnaries();
 		questionnaries.setId(question.getId());
 		questionnaries.setTitle(question.getTitle());
-
 		questionRepo.save(questionnaries);
 	}
+
+	public void uploadParticipant(List<String> participantIds, int questionId) {
+		for(String patricipantId : participantIds) {
+			QuestionnariesParticipant questionnariesParticipants = new QuestionnariesParticipant();
+			questionnariesParticipants.setParticipantId(patricipantId);
+			questionnariesParticipants.setQuestionnariesId(questionId);
+			questionnariesParticipantsRepo.save(questionnariesParticipants);
+		}
 	
-	public void uploadParticipant(Participants participants) {
-		participantRepo.save(participants);
 	}
     public void savePpt(int questionId, String pptDownloadUrl) {
     	Optional<Questionnaries> q= questionRepo.findById(questionId);
@@ -76,8 +82,20 @@ public class QuestionnariesService {
     }
 	
 	public void publishQuestionnaries(int questionId) {
-		Optional<Questionnaries> q= questionRepo.findById(questionId);
+		List<QuestionnariesParticipant> questionnariesParticipants = questionnariesParticipantsRepo.findByQuestionId(questionId);
+		for (QuestionnariesParticipant questionnariesParticipant : questionnariesParticipants) {
+			Optional<UserDao> user = userRepo.findById(questionnariesParticipant.getParticipantId());
+			String email = user.get().getUsername();
+			Optional<Questionnaries> question = questionRepo.findById(questionId);
+			String subject = question.get().getTitle();
+			String message = "hi "+ user.get().getName()+", \n\nclick the following link: http://localhost:8080/userloginpage \n\nAnd accept the terms and condition";
+			emailService.sendMail(email,subject, message);
+		}
+
 	}
+	
+	
+	
 	public String storeFile(MultipartFile file){
 
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
@@ -131,6 +149,13 @@ public class QuestionnariesService {
 	        super(message, cause);
 	    }
 	}
-		    
+
+	public List<QuestionnariesParticipant> generateReport(int questionId) {
+
+		List<QuestionnariesParticipant> questionnariesParticipants = questionnariesParticipantsRepo.findByQuestionId(questionId);
+		
+		return questionnariesParticipants;
+		
+	}	    
 
 }
