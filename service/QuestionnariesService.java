@@ -2,6 +2,7 @@ package com.sneha.service;
 
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ import java.nio.file.StandardCopyOption;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,77 +61,125 @@ public class QuestionnariesService {
             throw new FileUploadException("Unable to create the directory where the uploaded files will be stored.", ex);
         }
     }
-	public void add(Questionnaries question) {
-		Questionnaries questionnaries= new Questionnaries();
-		questionnaries.setId(question.getId());
-		questionnaries.setTitle(question.getTitle());
-		questionnaries.setDescription(question.getDescription());
-		questionnaries.setButtonText(question.getButtonText());
-		questionnaries.setButtonTitle(question.getButtonTitle());
-		questionnaries.setCheckBoxText(question.getCheckBoxText());
-		questionnaries.setStartDate(question.getStartDate());
-		questionnaries.setEndDate(question.getEndDate());
-		questionnaries.setMailBody(question.getMailBody());
-		questionRepo.save(questionnaries);
+	public int newQuestionnaries() {
+       long count= questionRepo.count();
+       Questionnaries questionnaries = new Questionnaries();
+       questionnaries.setQuestionId((int)count+1);
+       questionRepo.save(questionnaries);
+       return questionnaries.getQuestionId();
 	}
+	public ResponseEntity<?> add(Questionnaries question,int questionId) {
+		try{
+			Optional<Questionnaries> questionnariesOptional= questionRepo.findById(questionId);
+			Questionnaries questionnaries = questionnariesOptional.get();
+			questionnaries.setTitle(question.getTitle());
+			questionnaries.setDescription(question.getDescription());
+			questionnaries.setButtonText(question.getButtonText());
+			questionnaries.setButtonTitle(question.getButtonTitle());
+			questionnaries.setCheckBoxText(question.getCheckBoxText());
+			questionnaries.setStartDate(question.getStartDate());
+			questionnaries.setEndDate(question.getEndDate());
+			questionnaries.setMailBody(question.getMailBody());
+			questionRepo.save(questionnaries);
+			return new ResponseEntity<>(questionnaries,HttpStatus.OK);
+	   	}catch(NoSuchElementException e) {
+	   		return new ResponseEntity<>("invalid QuestionId : "+question.getQuestionId(),HttpStatus.BAD_REQUEST);
+	   	}
+		
+	  }
+	
+	public ResponseEntity<?> uploadParticipant(Set<String> participantIds, int questionId) {	
+		for(String participantId : participantIds) {
 
-	public void uploadParticipant(List<String> participantIds, int questionId) {
-		for(String patricipantId : participantIds) {
-			QuestionnariesParticipant questionnariesParticipants = new QuestionnariesParticipant();
-			questionnariesParticipants.setParticipantId(patricipantId);
-			questionnariesParticipants.setQuestionnariesId(questionId);
-			questionnariesParticipantsRepo.save(questionnariesParticipants);
+			    if(userRepo.findById(participantId).isEmpty()) {
+
+			    	return new ResponseEntity<>("Invalid userId: "+participantId,HttpStatus.BAD_REQUEST);				    
+			    }
+			    else {
+
+			    	if(questionnariesParticipantsRepo.updateStatus(participantId, questionId)==null) {
+						
+						QuestionnariesParticipant questionnariesParticipants = new QuestionnariesParticipant();
+						System.out.println(questionnariesParticipants);
+						questionnariesParticipants.setParticipantId(participantId);
+						questionnariesParticipants.setQuestionnariesId(questionId);
+						questionnariesParticipantsRepo.save(questionnariesParticipants);
+					}else {
+						QuestionnariesParticipant questionnariesParticipant=questionnariesParticipantsRepo.updateStatus(participantId, questionId);
+						questionnariesParticipant.setParticipantId(participantId);
+						questionnariesParticipant.setQuestionnariesId(questionId);
+						questionnariesParticipantsRepo.save(questionnariesParticipant);
+					}
+			    }
+					
 		}
 	
+        return new ResponseEntity<>(participantIds,HttpStatus.OK);
 	}
-    public void savePpt(int questionId, String pptDownloadUrl) {
-    	Optional<Questionnaries> q= questionRepo.findById(questionId);
-    	Questionnaries questionnaries = q.get();
-    	questionnaries.setPpt(pptDownloadUrl);
-    	questionRepo.save(questionnaries);
+    public ResponseEntity<String> savePpt(int questionId, String pptDownloadUrl) {
+	    try {
+	    	Optional<Questionnaries> q= questionRepo.findById(questionId);
+	    	Questionnaries questionnaries = q.get();
+	    	questionnaries.setPpt(pptDownloadUrl);
+	    	questionRepo.save(questionnaries);
+	    	return new ResponseEntity<>(pptDownloadUrl,HttpStatus.OK);
+		}
+		catch(NoSuchElementException e) {
+			return new ResponseEntity<>("Invalid questionId: "+questionId,HttpStatus.BAD_REQUEST);
+		}
+	
     }
 	
-	public void publishQuestionnaries(int questionId) {
-		List<QuestionnariesParticipant> questionnariesParticipants = questionnariesParticipantsRepo.findByQuestionId(questionId);
-		for (QuestionnariesParticipant questionnariesParticipant : questionnariesParticipants) {
-			Optional<UserDao> user = userRepo.findById(questionnariesParticipant.getParticipantId());
-			String email = user.get().getUsername();
-			Optional<Questionnaries> question = questionRepo.findById(questionId);
-			String subject = question.get().getTitle();
-			String message = question.get().getMailBody();
-			emailService.sendMail(email,subject, message);
+	public ResponseEntity<String> publishQuestionnaries(int questionId) {
+		try{
+			List<QuestionnariesParticipant> questionnariesParticipants = questionnariesParticipantsRepo.findByQuestionId(questionId);
+			for (QuestionnariesParticipant questionnariesParticipant : questionnariesParticipants) {
+				Optional<UserDao> user = userRepo.findById(questionnariesParticipant.getParticipantId());
+				String email = user.get().getUsername();
+				Optional<Questionnaries> question = questionRepo.findById(questionId);
+				String subject = question.get().getTitle();
+				String message = question.get().getMailBody();
+				emailService.sendMail(email,subject, message);
+			}
+            return new ResponseEntity<>("Published questionnaries successfully!!!",HttpStatus.OK);
+		}catch(NoSuchElementException e) {
+				return new ResponseEntity<>("Invalid questionId: "+questionId,HttpStatus.BAD_REQUEST);
 		}
-
 	}
 	
-	public List<QuestionnariesParticipant> generateReport(int questionId) {
-
-		List<QuestionnariesParticipant> questionnariesParticipants = questionnariesParticipantsRepo.findByQuestionId(questionId);
-		
-		return questionnariesParticipants;
-		
-	}
-	public void sendRemainder(int questionId) {
-
+	public ResponseEntity<String> sendRemainder(int questionId) {
+	try{
 		List<QuestionnariesParticipant> questionParticipants = questionnariesParticipantsRepo.findByQuestionId(questionId);
 		for(QuestionnariesParticipant questionnariesParticipant : questionParticipants) {
 			Optional<Questionnaries> question = questionRepo.findById(questionId);
 			Optional<UserDao> participant = userRepo.findById(questionnariesParticipant.getParticipantId());
-			if(questionnariesParticipant.getStatus() == false && question.get().getRemainder() == 1 ) {
+			if(questionnariesParticipant.getStatus() == false) {
 				String email = participant.get().getUsername();
 				String subject = "Remainder for accepting a "+ question.get().getTitle();
-				String message = "Hi "+ participant.get().getName()+",\n\nOnly one day remaining for accepting "+ question.get().getTitle()+"\n\nPlease accept by today!!!";
+				String message = "Hi "+ participant.get().getName()+",\n\nOnly "+question.get().getRemainder()+" day remaining for accepting "+ question.get().getTitle()+"\n\nPlease accept!!!";
 				emailService.sendMail(email,subject, message);
+				
+			}else {
+				return new ResponseEntity<>("Participant : "+participant.get().getEmployeeCode()+" has already accepted the question id"+questionId,HttpStatus.OK);
 			}
 		}
-	}	    
+		return new ResponseEntity<>("Sent remainder email successfully!!!",HttpStatus.OK);
+	  }catch(NoSuchElementException e) {
+			return new ResponseEntity<>("Invalid questionId: "+questionId,HttpStatus.BAD_REQUEST);
+	  }
+	}
 
-	
-	
+	public ResponseEntity<?> generateReport(int questionId) {
+	    if(questionRepo.findById(questionId).isPresent()){
+			List<QuestionnariesParticipant> questionnariesParticipants = questionnariesParticipantsRepo.findByQuestionId(questionId);
+			return new ResponseEntity<>(questionnariesParticipants,HttpStatus.OK);
+	    }else{
+				return new ResponseEntity<>("Invalid questionId: "+questionId,HttpStatus.BAD_REQUEST);
+		 }		
+	}
+		
 	public String storeFile(MultipartFile file){
-
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-
         try {
 	            if(fileName.contains("..")) {
 	                throw new FileStorageException ("Sorry! Filename contains invalid path sequence " + fileName);

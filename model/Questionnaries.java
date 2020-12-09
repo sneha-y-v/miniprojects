@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 public class Questionnaries {
 
     @Id
-    @GeneratedValue
 	private int questionId;
     
     @Column
@@ -25,7 +24,7 @@ public class Questionnaries {
     private String buttonText;
     
     @Column
-    private String CheckBoxText;
+    private String checkBoxText;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy")
     private Date startDate;
@@ -34,7 +33,7 @@ public class Questionnaries {
     private Date endDate;
     
     @Column
-    private int remainder;
+    private long remainder;
     
     @Column
     private String ppt;
@@ -47,101 +46,114 @@ public class Questionnaries {
 		super();
 	}
 
-	public int getId() {
-		return questionId;
-	}
 
-	public void setId(int id) {
-		questionId = id;
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	
 	public int getQuestionId() {
 		return questionId;
 	}
+
 
 	public void setQuestionId(int questionId) {
 		this.questionId = questionId;
 	}
 
+
+	public String getTitle() {
+		return title;
+	}
+
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+
 	public String getDescription() {
 		return description;
 	}
+
 
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+
 	public String getButtonTitle() {
 		return buttonTitle;
 	}
+
 
 	public void setButtonTitle(String buttonTitle) {
 		this.buttonTitle = buttonTitle;
 	}
 
+
 	public String getButtonText() {
 		return buttonText;
 	}
+
 
 	public void setButtonText(String buttonText) {
 		this.buttonText = buttonText;
 	}
 
+
 	public String getCheckBoxText() {
-		return CheckBoxText;
+		return checkBoxText;
 	}
 
+
 	public void setCheckBoxText(String checkBoxText) {
-		CheckBoxText = checkBoxText;
+		this.checkBoxText = checkBoxText;
 	}
+
 
 	public Date getStartDate() {
 		return startDate;
 	}
 
+
 	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
 	}
+
 
 	public Date getEndDate() {
 		return endDate;
 	}
 
+
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
 
-	public int getRemainder() {
+
+	public long getRemainder() {
+		long diff = endDate.getTime()-startDate.getTime();
+		this.remainder =  diff/(24*60*60*1000) ;
 		return remainder;
 	}
 
-	public void setRemainder(int remainder) {
-		this.remainder = remainder;
-	}
 
-	public String getMailBody() {
-		return mailBody;
-	}
-
-	public void setMailBody(String mailBody) {
-		this.mailBody = mailBody;
-	}
 
 	public String getPpt() {
 		return ppt;
 	}
 
+
 	public void setPpt(String ppt) {
 		this.ppt = ppt;
 	}
-	
+
+
+	public String getMailBody() {
+		return mailBody;
+	}
+
+
+	public void setMailBody(String mailBody) {
+		this.mailBody = mailBody;
+	}
+
+
+
 }

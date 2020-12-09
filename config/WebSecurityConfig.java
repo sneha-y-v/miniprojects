@@ -50,10 +50,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
 		
 				httpSecurity.csrf().disable()
-				.authorizeRequests().antMatchers("/login","/user/changePassword").permitAll()
-				.antMatchers("/user/add","/user/remove").hasRole("SUPERADMIN")
+				.authorizeRequests().antMatchers("/user/add","/login","/user/changePassword","/questionnaries/download-file/{fileName:.+}").permitAll()
+				.antMatchers("/user/remove").hasRole("SUPERADMIN")
 				.antMatchers("/questionnaries/**").hasAnyRole("ADMIN","SUPERADMIN")
-			    .antMatchers("/download-file/{fileName:.+}","/pendingList","/pendingQuestion","/completedList","/completedQuestion","/accept").hasRole("USER")
+			    .antMatchers("/pendingList","/pendingQuestion","/completedList","/completedQuestion","/accept").hasRole("USER")
 				.anyRequest().authenticated().and()
 			    .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);

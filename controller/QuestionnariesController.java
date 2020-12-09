@@ -2,12 +2,14 @@ package com.sneha.controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.core.io.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +25,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.sneha.model.Questionnaries;
 import com.sneha.model.QuestionnariesParticipant;
-import com.sneha.repository.QuestionnariesRepository;
 import com.sneha.service.QuestionnariesService;
 
 @RestController
@@ -33,57 +34,54 @@ public class QuestionnariesController {
 	@Autowired
 	private QuestionnariesService questionService;
 	
-	@Autowired
-	private QuestionnariesRepository questionRepo;
-	
 	@GetMapping("/new")
 	public int newQuestion(){
-		Questionnaries newQuestionId = new Questionnaries();		
-	    questionRepo.save(newQuestionId);
-		return newQuestionId.getId();
+
+		return questionService.newQuestionnaries();
 	}
 	
     @PutMapping("/save")
-    public void addQuestion(@RequestBody Questionnaries questionnaries) {
-    	questionService.add(questionnaries);
+    public ResponseEntity<?> addQuestion(@RequestBody Questionnaries questionnaries,@RequestParam int questionId) {
+    	
+    	return questionService.add(questionnaries,questionId);
     }
     
     @PutMapping("/uploadParticipant")
-    public void uploadParticipant(@RequestBody List<String> participantIds, @RequestParam int questionId) {    	
-
-    	questionService.uploadParticipant(participantIds,questionId);
+    public ResponseEntity<?> uploadParticipant(@RequestBody Set<String> participantIds, @RequestParam int questionId) {   
+    	
+    	return questionService.uploadParticipant(participantIds,questionId);
     }
 	
     @PutMapping("/uploadPpt")
-    public void uploadSingleFile(@RequestParam("file") MultipartFile file,@RequestParam("questionId") int questionId) {
+    public ResponseEntity<String> uploadSingleFile(@RequestParam("file") MultipartFile file,@RequestParam("questionId") int questionId) {
 	    int questionnariesId = questionId;
 	    String fileName = questionService.storeFile(file);
 	
 	    String pptDownloadUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-	            .path("/download-file/")
+	            .path("/questionnaries/download-file/")
 	            .path(fileName)
-	            .toUriString();
-	    questionService.savePpt(questionnariesId, pptDownloadUrl);
-	     
+	            .toUriString();	    
+	    return questionService.savePpt(questionnariesId, pptDownloadUrl);
+	    
 	  }
     
     @PutMapping("/publish")
-    public void publishQuestionnaries(@RequestParam int questionId) {         
-    	questionService.publishQuestionnaries(questionId);
+    public ResponseEntity<?> publishQuestionnaries(@RequestParam int questionId) {         
+    	
+    	return questionService.publishQuestionnaries(questionId);
     }
 
     @GetMapping("/remainder")
-    public void remainder(@RequestParam int questionId)
+    public ResponseEntity<String> remainder(@RequestParam int questionId)
     {
-    	questionService.sendRemainder(questionId);
+    	return questionService.sendRemainder(questionId);
     }
     
     @GetMapping("/report")
     @ResponseBody
-    public List<QuestionnariesParticipant> report(@RequestParam int questionId) throws IOException {
-    	List <QuestionnariesParticipant>questionnariesParticipants = questionService.generateReport(questionId);
-		
-    	return questionnariesParticipants;
+    public ResponseEntity<?> report(@RequestParam int questionId) throws IOException {
+	
+    	return  questionService.generateReport(questionId);
     }
     
     @GetMapping("/download-file/{fileName:.+}")

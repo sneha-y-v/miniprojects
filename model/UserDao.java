@@ -19,7 +19,6 @@ public class UserDao {
 	@Column
     @JsonIgnore
     private String password;
- 
     
 	@ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name="user_role",joinColumns={@JoinColumn(name="USER_ID", referencedColumnName="employeeCode")},inverseJoinColumns={@JoinColumn(name="ROLE_ID", referencedColumnName="id")})
@@ -38,11 +37,12 @@ public class UserDao {
 		this.password = password;
 	}
 
+
 	public Set<UserRoles> getRoles() {
 		return roles;
 	}
-	public void setRole(Set<UserRoles> role) {
-		this.roles = role;
+	public void setRoles(Set<UserRoles> roles) {
+		this.roles = roles;
 	}
 
 	public String getEmployeeCode() {

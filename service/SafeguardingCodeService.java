@@ -32,7 +32,7 @@ public class SafeguardingCodeService {
 
 		for(QuestionnariesParticipant questionnariesParticipant : pending) {
 			Optional<Questionnaries> question = questionRepo.findById(questionnariesParticipant.getQuestionnariesId()); 
-			pendingQuestionnariesList.put(question.get().getId(),question.get().getTitle());
+			pendingQuestionnariesList.put(question.get().getQuestionId(),question.get().getTitle());
 		}
 		return pendingQuestionnariesList;
 
@@ -45,7 +45,7 @@ public class SafeguardingCodeService {
 
 		for(QuestionnariesParticipant questionnariesParticipant : pending) {
 			Optional<Questionnaries> question = questionRepo.findById(questionnariesParticipant.getQuestionnariesId()); 
-			completedQuestionnariesList.put(question.get().getId(),question.get().getTitle());
+			completedQuestionnariesList.put(question.get().getQuestionId(),question.get().getTitle());
 		}
 		return completedQuestionnariesList;
 	}

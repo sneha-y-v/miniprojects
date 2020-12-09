@@ -2,11 +2,20 @@ package com.sneha.model;
 
 import javax.persistence.*;
 
+import org.hibernate.annotations.GenericGenerator;
+
 @Entity
 public class QuestionnariesParticipant {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(
+    	    strategy= GenerationType.AUTO,
+    	    generator="native"
+    	)
+    	@GenericGenerator(
+    	    name = "native",
+    	    strategy = "native"
+    	)
     private int id;    
    
     @Column(name = "question_id")
